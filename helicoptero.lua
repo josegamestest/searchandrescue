@@ -60,7 +60,7 @@ local function heli_control(self, dtime, touching_ground, liquid_below, vel_befo
 	local ctrl = driver:get_player_control()
 	
 	if ctrl.jump and ctrl.sneak then
-		minetest.chat_send_all("controle f")
+		--minetest.chat_send_all("controle f")
 		helicoptero(self, driver)
 	end
 
