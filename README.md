@@ -10,9 +10,8 @@ with the down button "shit" + the up button "spacer" the rope is released on the
 if it gets good, lap it to save people too
 </div>
 <div>
-Neste mod o helicopero utiliza boa parte do codigodo mod  Desour/helicopter,<br>
-  esta verçao sera fixa continuara utilisando este codigo como forck do anteriro
-Used mod link https://github.com/Desour/helicopter
+Neste mod o helicopero utiliza boa parte do codigodo mod  <a href="https://github.com/Desour/helicopter">Desour/helicopter<a>,<br>
+  esta verçao sera fixa continuara utilisando este codigo como forck do anteriro<br>
 </div>
 <div>
 <img src="https://github.com/josegamestest/searchandrescue/blob/main/screenshot.png?raw=true" alt="search and rescue image"> 
