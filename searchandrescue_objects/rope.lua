@@ -24,27 +24,34 @@ local rope_entity = {
 --function rope_entity.on_step(self, dtime)
 function rope_entity.on_step(self,pos,dtime)
 --on_step= function(self, pos, dtime)
-	if self.object:get_attach() == nil then self.object:remove() else 
-		local posicao = self.object:get_pos()
-		local posicao2 = vector.add({x=0, y=-5, z=0}, posicao)
+	if self.object:get_attach() == nil then self.object:remove() 
+	else 
+		
+		local distancia=10
+		local pos1 = self.object:get_pos()
+		pos1.z = pos1.z+math.random(-distancia, distancia)
+		pos1.x = pos1.x+math.random(-distancia, distancia)
+		local node_glow = minetest.get_node(pos1)
+		if node_glow.name == "air" or node_glow.name == "searchandrescue:glow" then
+			minetest.set_node(pos1, {name = "searchandrescue:glow" })
+			minetest.get_node_timer(pos1):start(4.5)
+		end
+		
 
+		
+		local posicao2 = vector.add({x=0, y=-5, z=0}, pos1)
 		if posicao2 == nil then minetest.chat_send_all("posicao nil") return end
 		local node = minetest.get_node(posicao2)
 
 		if node.name == "air" or node.name == "searchandrescue:glow" then
-				minetest.set_node(posicao2, {name = "searchandrescue:glow"})
 				minetest.get_node_timer(posicao2):start(1.0)
-		
+
 		end
 		--local all_objects = minetest.get_objects_inside_radius({x = pos.x, y = pos.y, z = pos.z}, 1)
 		local all_objects = minetest.get_objects_inside_radius(posicao2,2)
-		
---		local _,obj for _,obj in ipairs(all_objects) do
-		
+
 		for _,obj in pairs(minetest.get_objects_inside_radius(posicao2,2)) do
-
 			if obj:get_luaentity() ~= nil then
-
 				if not obj:is_player() and (not entity or not entity.name:find()) then 
 					minetest.sound_play("catch3", {pos=posicao2, gain = 1.0, max_hear_distance = 5})
 					obj:set_attach(self.object,"",{x = 0, y = -50, z =0}, {x = 0, y = 0, z = 0})

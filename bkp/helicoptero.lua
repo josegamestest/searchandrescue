@@ -202,12 +202,10 @@ end
 --local entrope=false
 function formulario_helicoptero(self, clicker)
 		local name = clicker:get_player_name()
-		local close= "image_button_exit[0.2,5.9;2,2;close.png;close;]"
-		local goout= "image_button_exit[5.8,5.9;2,2;goout.png;go_out;]"
-		--local goout=	"button_exit[4.8,5.9;3,1.8;go_out;go_out]"
-		local cam_set=	"image_button[0.3,0.4;2,2;cam_icone.png;cam_set;;false;true;]"
-		local tools=	"image_button[5.8,0.4;2,2;operador.png;tools;;false;true;]"
-		--local tools=	"button[4.7,0.4;3,1.8;tools;tools]"
+		local close=	"button_exit[0.2,5.9;3,1.8;close;close]"
+		local goout=	"button_exit[4.8,5.9;3,1.8;go_out;go_out]"
+		local cam_set=	"button[0.3,0.4;3,1.7;cam_set;cam_set]"
+		local tools=	"button[4.7,0.4;3,1.8;tools;tools]"
 		
 		local formulario = "formspec_version[3] size[8,8]"..close..goout..cam_set..tools.."]"
 		
@@ -217,7 +215,7 @@ function formulario_helicoptero(self, clicker)
 				--if formname == "man:helic" then
 						if fields.cam_set then
 							
-							camera_helicoptero2(self, clicker)
+							camera_helicoptero(self, clicker)
 						end
 						if fields.go_out then 
 							sair_helicoptero(self, clicker)
@@ -231,33 +229,25 @@ function formulario_helicoptero(self, clicker)
 end
 ------------------------------------------------------------------------------------------------------
 --camera helicoptero
-function camera_helicoptero2(self, clicker)
+function camera_helicoptero(self, clicker)
 		local name = clicker:get_player_name()
-		
-		local texto= "textarea[0.3,0.4;11.3,2;;;Camera system, the buttons put the right camera for the player to see around the helicopter]"
-		local close= "image_button[9.4,5.7;2,2;close.png;exit;;false;true;]"
-		local box=	 "box[0.2,2.8;11.6,5;]"
-		local cam_1= "image_button[0.4,3.1;2,2;cam_icone.png;cam_1;;false;true;]"
-		local cam_2= "image_button[2.6,3.1;2,2;cam_icone.png;cam_2;;false;true;]"
-		local cam_3= "image_button[4.8,3.1;2,2;cam_icone.png;cam_3;;false;true;]"
-		local cam_4= "image_button[7.1,3.1;2,2;cam_icone.png;cam_4;;false;true;]"
-		local cam_5= "image_button[9.4,3.1;2,2;cam_icone.png;cam_5;;false;true;]"
-		
-		
-		local formulario_camera2 = "formspec_version[3] size[12,8]"..box..texto..close.."]"
-									..cam_1..cam_2..cam_3..cam_4..cam_5.."]"
-		minetest.show_formspec(name,"man:form_camera2",formulario_camera2)
+		local cam_up= "button[2.5,0.3;3,1.8;cam_up;cam_up]"
+		local cam_down= "button[2.6,5.3;3,1.8;cam_down;cam_down]"
+		local cam_front= "button[0.2,2.7;3,1.8;cam_front;cam_front]"
+		local cam_back= "button[4.8,2.6;3,1.8;cam_back;cam_back]"
+			
+		local formulario_camera = "formspec_version[3] size[8,8]"..cam_up..cam_down..cam_front..cam_back.."]"
+		minetest.show_formspec(name,"man:form_camera",formulario_camera)
 				
 			minetest.register_on_player_receive_fields(function(clicker, formname, fields)
-			if formname == "man:form_camera2" then
-			            
-						if fields.cam_1 then clicker:set_eye_offset({x = 0, y = 24.5, z =30}, {x = 0, y = 8, z = -5})
-					elseif fields.cam_2 then clicker:set_eye_offset({x = 0, y = 0, z = -60}, {x = 0, y = 0, z = 0})
-					elseif fields.cam_3 then clicker:set_eye_offset({x = 0, y = 60, z = -60}, {x = 0, y = 0, z = 0})
-					elseif fields.cam_4 then clicker:set_eye_offset({x = 0, y = -5, z = 0}, {x = 0, y = 0, z = 0})
-					elseif fields.cam_5 then clicker:set_eye_offset({x = -30, y = 30, z = -30}, {x = 0, y = 0, z = 0})
-					elseif fields.exit then  formulario_helicoptero(self, clicker)
+			if formname == "man:form_camera" then
+					if fields.cam_up and eyes_set_y<=50 then		eyes_set_y=eyes_set_y+1
+					elseif fields.cam_down and eyes_set_y>=0 then	eyes_set_y=eyes_set_y-1
+					elseif fields.cam_front and eyes_set_z<=50 then eyes_set_z=eyes_set_z+1
+					elseif fields.cam_back and eyes_set_z>=0 then 	eyes_set_z=eyes_set_z-1
 					end
+					clicker:set_eye_offset( {x = 0, y = eyes_set_y, z =eyes_set_z}, {x = 0, y = 8, z = -5})
+					minetest.chat_send_player(name, "cam_pos y:"..eyes_set_y.." z:"..eyes_set_z)
 			return end
 			return true end )
 end
