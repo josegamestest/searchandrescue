@@ -22,6 +22,7 @@ In this mod the helicopter uses a good part of the mod code <a href="https://git
    this version will be fixed and will continue using this code as the previous forck</br>
   
  </div>
+<img src="https://github.com/josegamestest/searchandrescue/blob/main/screenshot.png">
  <div>
 <h2>❗Attention</h2>
  mod under development and may contain some bugs<br>
