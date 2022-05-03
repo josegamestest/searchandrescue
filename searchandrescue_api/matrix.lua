@@ -4,8 +4,10 @@
 matrix3 = {}
 
 function matrix3.new(a, ...)
-	if not a then	return {0, 0, 0, 0, 0, 0, 0, 0, 0}
-	elseif type(a) ~= "table" then	return {a, ...}
+	if not a then
+		return {0, 0, 0, 0, 0, 0, 0, 0, 0}
+	elseif type(a) ~= "table" then
+		return {a, ...}
 	else
 		return {a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9]}
 	end
@@ -15,13 +17,19 @@ matrix3.identity = {1, 0, 0, 0, 1, 0, 0, 0, 1}
 
 function matrix3.apply(m, func)
 	local mr = {}
-	for i = 1, 9 do	mr[i] = func(m[i])	end	return mr
+	for i = 1, 9 do
+		mr[i] = func(m[i])
+	end
+	return mr
 end
 
 function matrix3.equals(m1, m2)
 	for i = 1, 9 do
-		if m1[i] ~= m2[i] then	return false end
-	end	return true
+		if m1[i] ~= m2[i] then
+			return false
+		end
+	end
+	return true
 end
 
 function matrix3.index(m, l, c)
