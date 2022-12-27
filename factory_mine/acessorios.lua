@@ -1,6 +1,6 @@
 minetest.register_node("factory_mine:factory_mine_light", {
 	description ="factory_mine_light",
-	drawtype = "nodebox", 
+	drawtype = "nodebox",
     use_texture_alpha ="clip",
 	paramtype = "light",
 	is_ground_content = false,

@@ -1,16 +1,13 @@
                     --1         2               3               4                5
                 --veiculo, imagem_veiculo,  carenagem_veiculo, icone_veiculo, core_icone
-local vehicles={ 
+local vehicles={
                 {"fire_truck","fire_truck.png","fire_truck.b3d","fire_truck_icon.png"},
         }
-
-
 local STEPH = 1 -- Stepheight, 10 = climb slabs, 0.1 = climb nodes
 local function is_ground(pos)
   local nn = minetest.get_node(pos).name
   return minetest.get_item_group(nn, "stone") ~= 0
 end
-
 
 local function get_sign(i)
   if i == 0 then return 0
@@ -19,13 +16,11 @@ local function get_sign(i)
 	end
 end
 
-
 local function get_velocity(v, yaw, y)
   local x = -math.sin(yaw) * v
   local z =  math.cos(yaw) * v
   return {x = x, y = y, z = z}
 end
-
 
 local function get_v(v) return math.sqrt(v.x ^ 2 + v.z ^ 2) end
 
@@ -33,19 +28,14 @@ local function get_v(v) return math.sqrt(v.x ^ 2 + v.z ^ 2) end
 -- Car entity
 --vehicles  carroceria  icone base
 
-
 local fire_truck = {
   physical = true,
---  collisionbox = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
   selection_box = {type = "fixed",fixed = {-1, -0.5,-1.5, 1, 1.3, 1.5}},
   collision_box = {type = "fixed",fixed = {-1, -0.5, -1.5, 1, 1.3, 1.5}},
   visual = "mesh",
-  --visual_size = {x=5, y=1},
   mesh = vehicles[1][3],
-    backface_culling = false,
-  --textures = {"fire_truck.png^(fire_truck_carenagem.png^[multiply:#AA000070)",},
-    textures = {vehicles[1][2]},
-                
+  backface_culling = false,
+  textures = {vehicles[1][2]},
   stepheight = STEPH,
   --drawtype="allfaces",
   driver = nil,
@@ -61,15 +51,12 @@ local function DetachPlayer(self, clicker, is_driver)
   default.player_set_animation(clicker, "stand" , 30)
   if not is_driver then
     clicker:set_eye_offset({x=0, y=-0, z=1}, {x=0, y=0, z=0})
-    
   end
   return nil
 end
 
 function fire_truck.on_rightclick(self, clicker)
-  if not clicker or not clicker:is_player() then
-    return
-  end
+  if not clicker or not clicker:is_player() then return end
   local name = clicker:get_player_name()
   if self.driver and clicker == self.driver then
     self.driver = nil
@@ -77,23 +64,24 @@ function fire_truck.on_rightclick(self, clicker)
     default.player_attached[name] = false
     default.player_set_animation(clicker, "stand" , 30)
     local pos = clicker:get_pos()
+
     pos = {x = pos.x, y = pos.y + 0.1, z = pos.z}
-    clicker:set_eye_offset({x=0, y=0, z=0}, {x=0, y=0, z=0})
+    clicker:set_eye_offset({x=0, y=0, z=0}, {x=0, y=1, z=0})
     minetest.after(0.1, function()
       clicker:set_pos(pos)
     end)
   elseif not self.driver then
     self.driver = clicker
-    clicker:set_attach(self.object, "",{x = -2, y = 0.9, z = 20},{x = 0, y = 0, z = 0})
-    default.player_attached[name] = true
-    minetest.after(0.2, function()
-      default.player_set_animation(clicker, "sit" , 30)
+    clicker:set_attach(self.object, "",{x = -3, y = -0.2, z = 0},{x = 0, y = 0, z = 0})
+
+    --minetest.after(0.2, function()
+	default.player_set_animation(clicker, "sit" , 30)
     clicker:set_eye_offset({x=-0, y=0.9, z=0}, {x=0, y=0, z=0})
-    end)
+    default.player_attached[name] = true
+    --end)
     self.object:set_yaw(clicker:get_look_horizontal() - math.pi / 2)
   end
 end
-
 
 function fire_truck.on_activate(self, staticdata, dtime_s)
   self.object:set_armor_groups({immortal = 1})
@@ -109,11 +97,8 @@ function fire_truck.get_staticdata(self)
 end
 
 
-function fire_truck.on_punch(self, puncher, time_from_last_punch,
-    tool_capabilities, direction)
-  if not puncher or not puncher:is_player() or self.removed then
-    return
-  end
+function fire_truck.on_punch(self, puncher, time_from_last_punch, tool_capabilities, direction)
+  if not puncher or not puncher:is_player() or self.removed then return end
   if self.driver and puncher == self.driver then
     self.driver = nil
     puncher:set_detach()
@@ -124,11 +109,8 @@ function fire_truck.on_punch(self, puncher, time_from_last_punch,
     -- delay remove to ensure player is detached
     minetest.after(0.1, function()
     puncher:get_inventory():add_item("main", "searchandrescue:"..vehicles[1][1])
-      self.object:remove()
+	self.object:remove()
     end)
-    --[[if not minetest.settings:get("creative_mode") then
-      puncher:get_inventory():add_item("main", "searchandrescue:"..vehicles[1][1])
-    end]]
   end
 end
 
@@ -169,8 +151,8 @@ function fire_truck.on_step(self, dtime)
     self.v = 0
     return
   end
-  if math.abs(self.v) > 11 then
-    self.v = 11 * get_sign(self.v)
+  if math.abs(self.v) > 5 then
+    self.v = 5 * get_sign(self.v)
   end
 
   local p = self.object:get_pos()
@@ -189,8 +171,8 @@ function fire_truck.on_step(self, dtime)
     self.object:set_pos(self.object:get_pos())
   else
     p.y = p.y + 1
-    if is_ground(p) then 
-		
+    if is_ground(p) then
+
 	  local y = self.object:get_velocity().y
       if y >= 24 then y = 24
       elseif y < 0 then new_acce = {x = 0, y = 3, z = 0}
@@ -217,9 +199,7 @@ function fire_truck.on_step(self, dtime)
   self.object:set_acceleration(new_acce)
 end
 
-
 minetest.register_entity("searchandrescue:"..vehicles[1][1], fire_truck)
-
 
 minetest.register_craftitem("searchandrescue:"..vehicles[1][1], {
   description = vehicles[1][1],

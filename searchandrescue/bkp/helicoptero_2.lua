@@ -14,8 +14,45 @@ searchandrescue.friction_land_constant = 2
 searchandrescue.friction_water_quadratic = 0.1
 searchandrescue.friction_water_constant = 1
 
+searchandrescue.hoock="false"
+		
+
 local eyes_set_y=24.5
 local eyes_set_z=30
+
+--form_setup 1
+searchandrescue.cam_set=	"image_button[0.3,0.4;2,2;cam_icone.png;cam_set;;false;true;]"
+searchandrescue.tools=	"image_button[9.4,0.4;2,2;operador.png;tools;;false;true;]"
+searchandrescue.goout=	"image_button_exit[0.2,5.9;2,2;goout.png;go_out;]"
+searchandrescue.close= "image_button_exit[9.4,5.7;2,2;close.png;exit;]"
+--cameras
+searchandrescue.texto= "textarea[0.3,0.4;11.3,2;;;Camera system,"..
+		"the buttons put the right camera for the player to see around the helicopter]"
+searchandrescue.box=	 "box[0.2,2.8;11.6,5;]"
+searchandrescue.cam_1= "image_button[0.4,3.1;2,2;cam_icone.png;cam_1;;false;true;]"
+searchandrescue.cam_2= "image_button[2.6,3.1;2,2;cam_icone.png;cam_2;;false;true;]"
+searchandrescue.cam_3= "image_button[4.8,3.1;2,2;cam_icone.png;cam_3;;false;true;]"
+searchandrescue.cam_4= "image_button[7.1,3.1;2,2;cam_icone.png;cam_4;;false;true;]"
+searchandrescue.cam_5= "image_button[9.4,3.1;2,2;cam_icone.png;cam_5;;false;true;]"
+searchandrescue.formulario_tamanho="formspec_version[5]size[12,8]"
+
+--form setup 2
+local formulario_base =""..
+		searchandrescue.formulario_tamanho..
+		searchandrescue.close..
+		searchandrescue.goout..
+		searchandrescue.cam_set..
+		searchandrescue.tools.."]"
+local formulario_camera2 =""..
+		searchandrescue.formulario_tamanho..
+		searchandrescue.box..
+		searchandrescue.texto..
+		searchandrescue.close.."]"..
+		searchandrescue.cam_1..
+		searchandrescue.cam_2..
+		searchandrescue.cam_3..
+		searchandrescue.cam_4..
+		searchandrescue.cam_5.."]"
 
 if not minetest.global_exists("matrix3") then
 	dofile(minetest.get_modpath("searchandrescue") .. DIR_DELIM .. "searchandrescue_api/matrix.lua")
@@ -43,7 +80,6 @@ end
 ------------------------------------------------------------------------------------------------------
 function searchandrescue.heli_control(self, dtime, touching_ground, liquid_below, vel_before)
 	local driver = minetest.get_player_by_name(self.driver_name)
-	searchandrescue.sair_helicoptero_b(self)
 	if not driver then
 		-- there is no driver (eg. because driver left)
 		self.driver_name = nil
@@ -119,11 +155,8 @@ minetest.register_entity("searchandrescue:helicopter", {
 	initial_properties = {
 		physical = true,
 		collide_with_objects = true,
---                       D    F  E S t
-		--collisionbox = {-3,0,-3, 3,3,3},
-		--selectionbox = {-3,0,-3, 3,3,3},
-		collisionbox = {-1,0,-1, 1,1,1},
-		selectionbox = {-1,0,-1, 1,1,1},
+		collisionbox = {-2,0,-2, 2,0.3,2},
+		selectionbox = {-2,0,-2, 2,0.3,2},
 		visual = "mesh",
 		mesh = "helicoptero.b3d",
 		textures = {"helicoptero.png"},
@@ -170,9 +203,7 @@ on_step = function(self, dtime)
 		end)
 
 		self.object:set_velocity(vel)
-
---		searchandrescue.sair_helicoptero_b(self)
-		end,
+	end,
 on_punch = function(self, puncher) if puncher then return false end end,
 
 on_place = function(itemstack, placer, pointed_thing)
@@ -185,14 +216,52 @@ on_place = function(itemstack, placer, pointed_thing)
 
 on_rightclick = function(self, clicker)
 		if not clicker or not clicker:is_player() then return end
-		local name = clicker:get_player_name() if name == nil then return end
-		local ent = self.object:get_luaentity() if ent == nil then return end
-		if name ~= self.driver_name then
-				searchandrescue.entrar_helicoptero(self, clicker)
-		--elseif name == self.driver_name then
-		--	searchandrescue.sair_helicoptero_b(self)
-		end
-end
+		local name = clicker:get_player_name() if name == nil then return end 
+		local ent = self.object:get_luaentity() if ent == nil then return end 
+		if name ~= self.driver_name then searchandrescue.entrar_helicoptero(self, clicker)
+		elseif name == self.driver_name then 
+					--add rope
+				searchandrescue.add_rope=	"checkbox[0.6,0.7;add_rope;add_rope;"..ent.add_rope_ative.."]"
+				local tools_helicoptero =""..
+										searchandrescue.formulario_tamanho..
+										searchandrescue.add_rope..
+										searchandrescue.close.."]"
+	--form1
+				minetest.show_formspec(name,"clicker:helic",formulario_base)
+
+				minetest.register_on_player_receive_fields(function(clicker, formname, fields)
+				if formname == "clicker:helic" then
+					if fields.cam_set then	minetest.show_formspec(name,"clicker:helic_cam",formulario_camera2) end
+					if fields.go_out then 	searchandrescue.sair_helicoptero(self, clicker)
+											minetest.close_formspec(name, "clicker:helic_cam")
+					end
+
+					if fields.tools then	minetest.show_formspec(name,"clicker:tools_helicoptero",tools_helicoptero) end
+	--cameras
+				elseif formname == "clicker:helic_cam" then
+					if fields.cam_1 then clicker:set_eye_offset({x = 0, y = 24.5, z =30}, {x = 0, y = 8, z = -5})
+						elseif fields.cam_2 then clicker:set_eye_offset({x = 0, y = 0, z = -60}, {x = 0, y = 0, z = 0})
+						elseif fields.cam_3 then clicker:set_eye_offset({x = 0, y = 60, z = -60}, {x = 0, y = 0, z = 0})
+						elseif fields.cam_4 then clicker:set_eye_offset({x = 0, y = -5, z = 0}, {x = 0, y = 0, z = 0})
+						elseif fields.cam_5 then clicker:set_eye_offset({x = -30, y = 30, z = -30}, {x = 0, y = 0, z = 0})
+						elseif fields.exit then  minetest.close_formspec(name, "clicker:helic")
+					end
+	--add rope
+				elseif formname == "clicker:tools_helicoptero" then
+					if fields.add_rope then
+						if fields.add_rope=="true" then
+							ent.add_rope_ative="true"
+							searchandrescue.roope_helicoptero(self, clicker)
+							searchandrescue.attachment_helicoptero(self, clicker, rook)
+						else
+							ent.add_rope_ative="false"
+							searchandrescue.roope_helicoptero(self, clicker)
+							searchandrescue.attachment_helicoptero(self, clicker, rook)
+						end
+					end
+				end
+			end )
+	end end
 })
 -----------------------------------------------------------------------------------------------------------------------------------------
 function searchandrescue.entrar_helicoptero(self, clicker)
@@ -220,7 +289,7 @@ function searchandrescue.entrar_helicoptero(self, clicker)
 			self.object:set_acceleration(vector.new())
 		end
 ------------------------------------------------------------------------------------------------------
---[[function searchandrescue.sair_helicoptero(self, clicker)
+function searchandrescue.sair_helicoptero(self, clicker)
 	if not clicker or not clicker:is_player() then return end
 		local name = clicker:get_player_name()
 		if name == self.driver_name then
@@ -237,35 +306,72 @@ function searchandrescue.entrar_helicoptero(self, clicker)
 			player_api.set_animation(clicker, "stand")
 			-- gravity
 			self.object:set_acceleration(vector.multiply(searchandrescue.vector_up, -gravity))
-end end]]
-------------------------------------------------------------------------------------------------------------------------------------
-function searchandrescue.attachment_helicoptero(self, clicker, rook)
+end end
+------------------------------------------------------------------------------------------------------
+
+
+function searchandrescue.roope_helicoptero(self, clicker, rook)
 	local ent = self.object:get_luaentity()
 	local throw_starting_pos={}
-end
+	throw_starting_pos = vector.add({x=0, y=2, z=0}, self.object:get_pos())
+	rook=minetest.add_entity(throw_starting_pos, "searchandrescue:hook_entity", name)
+	if ent.add_rope_ative=="true"then
+		rook:set_attach(self.object,"",{x = 0, y = -1.5, z =0}, {x = 0, y = 0, z = 0})
+	elseif ent.add_rope_ative =="false" then
+		for _, object in ipairs(minetest.get_objects_inside_radius(throw_starting_pos,5)) do
+			local luaentity = object:get_luaentity()
 
-
-function searchandrescue.sair_helicoptero_b(self)
-	for _, player in ipairs(minetest.get_connected_players()) do
-		if (player:get_player_control().aux1) then
-		--if (player:get_player_control().sneak) then
-			if not player or not player:is_player() then return end
-			local nome=player:get_player_name()
-			if nome == self.driver_name then
-				self.driver_name = nil
-				-- sound and animation
-				minetest.sound_stop(self.sound_handle)
-				self.sound_handle = nil
-				self.object:set_animation_frame_speed(0)
-				-- detach the player
-				player:set_detach()
-				player:set_eye_offset({x = 0, y = 0, z = 0}, {x = 0, y = 0, z = 0})
-				player_api.player_attached[nome] = nil
-				-- player should stand again
-				player_api.set_animation(player, "stand")
-				-- gravity
-				self.object:set_acceleration(vector.multiply(searchandrescue.vector_up, -gravity))
+			if not object:is_player() and luaentity and luaentity.itemstring ~="" and luaentity.name=="searchandrescue:hook_entity" and
+				luaentity.name~="searchandrescue:helicopter"then
+				minetest.sound_play("item_drop_pickup", {to_player = clicker:get_player_name(),gain = 0.4,})
+				luaentity.itemstring = ""
+				--object:remove()
+				object:set_detach()
 			end
 		end
 	end
 end
+------------------------------------------------------------------------------------------------------------------------------------------
+function searchandrescue.attachment_helicoptero(self, clicker, rook)
+	local ent = self.object:get_luaentity()
+	local throw_starting_pos={}
+
+	if ent.add_rope_ative=="true"then
+		throw_starting_pos = vector.add({x=0, y=-5, z=0}, self.object:get_pos())
+		for _, object in ipairs(minetest.get_objects_inside_radius(throw_starting_pos,2)) do
+			local luaentity = object:get_luaentity()
+			if not object:is_player() and
+					luaentity and
+					luaentity.itemstring ~="" and
+					luaentity.name~="searchandrescue:hook_entity" and
+					luaentity.name~="searchandrescue:helicopter"then
+
+					minetest.sound_play("item_drop_pickup", {to_player = clicker:get_player_name(),gain = 0.4,})
+					object:set_attach(self.object,"",{x = 0, y = -45, z =0})
+					object:set_pos(throw_starting_pos)
+					
+					self.object:set_properties({
+						collisionbox = {-2,-7,-2, 2,0.3,2},
+						selectionbox = {-2,-7,-2, 2,0.3,2}
+					})
+			end
+		end
+
+	elseif ent.add_rope_ative =="false" then
+		for _, object in ipairs(minetest.get_objects_inside_radius(self.object:get_pos(),2)) do
+			local luaentity = object:get_luaentity()
+			
+			if not object:is_player() and
+					luaentity and
+					luaentity.itemstring ~="" and
+					luaentity.name~="searchandrescue:hook_entity" and
+					luaentity.name~="searchandrescue:helicopter"then
+
+					minetest.sound_play("item_drop_pickup", {to_player = clicker:get_player_name(),gain = 0.4,})
+					object:set_detach()
+					object:set_pos(vector.add({x = 0, y =-7, z =0}, self.object:get_pos()))
+
+					self.object:set_properties({
+						collisionbox = {-2,0,-2, 2,0.3,2}, selectionbox = {-2,0,-2, 2,0.3,2}
+					})
+	end	 end end end

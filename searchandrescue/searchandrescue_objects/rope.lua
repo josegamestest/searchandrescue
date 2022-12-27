@@ -21,7 +21,7 @@ local rope_entity = {
 }
 
 function rope_entity.on_step(self,pos,dtime)
-	if self.object:get_attach() == nil  then self.object:remove() end 
+	if self.object:get_attach() == nil  then self.object:remove() end
 end
 --[[
 		local distancia=10
@@ -47,28 +47,24 @@ end
 
 		for _,obj in pairs(minetest.get_objects_inside_radius(posicao2,2)) do
 			if obj:get_luaentity() ~= nil then
-				if not obj:is_player() and (not entity or not entity.name:find()) then 
+				if not obj:is_player() and (not entity or not entity.name:find()) then
 					minetest.sound_play("catch3", {pos=posicao2, gain = 1.0, max_hear_distance = 5})
 					obj:set_attach(self.object,"",{x = 0, y = -50, z =0}, {x = 0, y = 0, z = 0})
-					
-					if self.object:get_attach() == nil 
-						then self.object:remove() 
-					end 
+
+					if self.object:get_attach() == nil
+						then self.object:remove()
+					end
 
 				end
 			end
 		end
 end]]
 minetest.register_entity("searchandrescue:hook_entity", rope_entity)
-
-
-
-
 minetest.register_node("searchandrescue:glow", {description = "glow",
     drawtype = "airlike",paramtype = "light", walkable = false,
 	buildable_to = true, pointable = false, sunlight_propagates = true,light_source = 13,
 	on_construct = function(pos)minetest.get_node_timer(pos):start(1.0)end,
 	on_timer = function(pos, elapsed) minetest.swap_node(pos, {name = "air"})end,
-	drop = "", 
+	drop = "",
 groups = {not_in_creative_inventory=1},
 })
